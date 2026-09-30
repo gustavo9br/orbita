@@ -3,7 +3,7 @@
 Projeto da disciplina **Produtividade e Gestão do Tempo**. O Órbita é o meu *Personal Operating System (POS)*: um app web que junta num só lugar a captura de demandas, a priorização, o planejamento da semana, os blocos de foco, a comunicação profissional e o acompanhamento de energia e hábitos. Usa Inteligência Artificial (OpenAI) como copiloto em cada etapa e se integra à **Google Agenda** e ao **Notion**.
 
 > 🔗 **Acesse:** https://orbita.gustavomartins.dev
-> 🎥 **Vídeo pitch:** _[link do YouTube/Loom]_
+> 🎥 **Vídeo pitch:** https://youtu.be/SryddYIy0o0
 > 📄 **Parte teórica:** [docs/parte-teorica.md](docs/parte-teorica.md)
 
 ![Painel do Órbita](docs/prints/07-painel.png)

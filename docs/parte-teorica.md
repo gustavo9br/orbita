@@ -1,18 +1,11 @@
-<!--
-  RASCUNHO. REVISAR ANTES DE ENTREGAR (este comentário não aparece no Markdown renderizado).
-  Suposições sobre a rotina que precisam ser confirmadas ou corrigidas:
-  - Seção 1: horários (início ~8h, trabalho indo até 22h/23h), nº de clientes, canais (WhatsApp/Slack/e-mail), sono ~6h.
-  - Seção 1: a estimativa "~40% do dia em interrupções" é percepção, não medição. Ajuste ou retire.
-  - Seção 7: as metas são sugestões. Se já tiver usado o sistema por alguns dias, troque por números reais do Painel.
-  Apague este comentário depois de revisar.
--->
-
 # Meu Sistema Operacional Pessoal: utilizando IA para gerenciar tempo, comunicação e produtividade
 
-**Disciplina:** Produtividade e Gestão do Tempo
-**Aluno:** Gustavo Martins
-**Entregável 1:** Parte teórica (análise e discussão)
-**Sistema desenvolvido:** Órbita, disponível em https://orbita.gustavomartins.dev
+**Disciplina:** Produtividade e Gestão do Tempo\
+**Aluno:** Gustavo Martins\
+**Entregável 1:** Parte teórica (análise e discussão)\
+**Sistema desenvolvido:** Órbita, disponível em <https://orbita.gustavomartins.dev>\
+**Código-fonte:** <https://github.com/gustavo9br/orbita>\
+**Vídeo pitch:** <https://youtu.be/SryddYIy0o0>
 
 ---
 
