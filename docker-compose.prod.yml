@@ -1,0 +1,57 @@
+# Stack de produção (Docker Swarm + Traefik) para o Portainer.
+# Não contém segredos: todos os valores vêm de variáveis. No Portainer, em
+# Stacks > Add stack > Web editor, cole este arquivo e em "Environment variables"
+# use "Load variables from .env file" com o arquivo vps.env (veja vps.env.example).
+services:
+  backend:
+    image: ghcr.io/gustavo9br/orbita-backend:latest
+    environment:
+      NODE_ENV: production
+      TZ: ${TZ:-America/Sao_Paulo}
+      APP_PASSWORD: ${APP_PASSWORD:?defina APP_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET:?defina SESSION_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5.4-mini}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      GOOGLE_CALENDAR_ICS_URL: ${GOOGLE_CALENDAR_ICS_URL:-}
+      NOTION_TOKEN: ${NOTION_TOKEN:-}
+      NOTION_PARENT_PAGE_ID: ${NOTION_PARENT_PAGE_ID:-}
+    volumes:
+      - orbita-data:/app/data
+    networks:
+      - externa
+    deploy:
+      replicas: 1 # SQLite: uma réplica só
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.orbita-api.rule=Host(`${DOMINIO:-orbita.gustavomartins.dev}`) && PathPrefix(`/api`)
+        - traefik.http.routers.orbita-api.entrypoints=websecure
+        - traefik.http.routers.orbita-api.tls.certresolver=le
+        - traefik.http.routers.orbita-api.priority=10
+        - traefik.http.services.orbita-api.loadbalancer.server.port=3001
+
+  frontend:
+    image: ghcr.io/gustavo9br/orbita-frontend:latest
+    networks:
+      - externa
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.orbita-app.rule=Host(`${DOMINIO:-orbita.gustavomartins.dev}`)
+        - traefik.http.routers.orbita-app.entrypoints=websecure
+        - traefik.http.routers.orbita-app.tls.certresolver=le
+        - traefik.http.routers.orbita-app.priority=1
+        - traefik.http.services.orbita-app.loadbalancer.server.port=80
+
+volumes:
+  orbita-data:
+
+networks:
+  externa:
+    external: true

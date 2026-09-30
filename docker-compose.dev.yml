@@ -1,0 +1,20 @@
+# Sobe backend + frontend em containers localmente: http://localhost:5173
+services:
+  backend:
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_PATH: /app/data/orbita.db
+    volumes:
+      - orbita-data:/app/data
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  orbita-data:
