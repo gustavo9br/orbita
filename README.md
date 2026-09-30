@@ -117,7 +117,7 @@ Depois, em **Ajustes**, use "Sincronizar agora" para a Google Agenda e para o No
 
 ### Deploy (VPS)
 
-1. O push em `main` dispara o GitHub Actions, que faz o build das imagens **arm64** (QEMU + Buildx) e publica no GHCR (`ghcr.io/gustavo9br/orbita-backend` e `orbita-frontend`).
+1. O push em `main` dispara o GitHub Actions, que faz o build das imagens **amd64** (arquitetura da VPS) e publica no GHCR (`ghcr.io/gustavo9br/orbita-backend` e `orbita-frontend`).
 2. No Portainer: **Stacks → Add stack → Web editor**, cole o [docker-compose.prod.yml](docker-compose.prod.yml).
 3. Em **Environment variables → Load variables from .env file**, carregue o seu `vps.env` (copiado de [vps.env.example](vps.env.example) e preenchido; ele não é versionado).
 4. Deploy. O Traefik roteia `orbita.gustavomartins.dev/api` para o backend e o resto para o frontend. O SQLite fica no volume `orbita-data`, por isso o backend roda com **uma réplica só**.

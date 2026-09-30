@@ -20,12 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # A VPS é ARM64 e os runners do GitHub são amd64: build cruzado via QEMU + Buildx.
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
+      # A VPS deste projeto é amd64, igual aos runners do GitHub: build nativo, sem QEMU.
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -40,6 +35,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./${{ matrix.service }}
-          platforms: linux/arm64
+          platforms: linux/amd64
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/orbita-${{ matrix.service }}:latest

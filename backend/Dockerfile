@@ -1,4 +1,4 @@
-# node:22 (Debian/glibc): traz o módulo nativo node:sqlite e cross-compila bem pra arm64 sob QEMU
+# node:22 (Debian/glibc): já traz o módulo nativo node:sqlite, sem dependência nativa pra compilar
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
 COPY package*.json ./
