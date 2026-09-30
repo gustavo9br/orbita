@@ -1,6 +1,6 @@
 # Órbita: Sistema Operacional Pessoal
 
-Projeto da disciplina **Produtividade e Gestão do Tempo**. O Órbita é o meu *Personal Operating System (POS)*: um app web que junta num só lugar a captura de demandas, a priorização, o planejamento da semana, os blocos de foco, a comunicação profissional e o acompanhamento de energia e hábitos. Usa Inteligência Artificial (OpenAI, com suporte também ao Claude da Anthropic) como copiloto em cada etapa e se integra à **Google Agenda** e ao **Notion**.
+Projeto da disciplina **Produtividade e Gestão do Tempo**. O Órbita é o meu *Personal Operating System (POS)*: um app web que junta num só lugar a captura de demandas, a priorização, o planejamento da semana, os blocos de foco, a comunicação profissional e o acompanhamento de energia e hábitos. Usa Inteligência Artificial (OpenAI) como copiloto em cada etapa e se integra à **Google Agenda** e ao **Notion**.
 
 > 🔗 **Acesse:** https://orbita.gustavomartins.dev
 > 🎥 **Vídeo pitch:** _[link do YouTube/Loom]_
@@ -29,7 +29,7 @@ A ideia central é que **nada fica na cabeça**: tudo o que chega (pedido de cli
 
 | Ferramenta | Papel no sistema |
 |---|---|
-| **OpenAI (Responses API)**, modelo configurável (padrão `gpt-5.4-mini`) | Triagem da caixa de entrada, planejamento semanal, redação de mensagens, standup e revisão semanal. Saída estruturada (JSON validado por schema Zod) pra que o resultado vire dado no sistema, e não só texto. O provedor é trocável: com `ANTHROPIC_API_KEY` o mesmo fluxo roda no **Claude** (`claude-opus-5-5`) |
+| **OpenAI (Responses API)**, modelo configurável (padrão `gpt-5.4-mini`) | Triagem da caixa de entrada, planejamento semanal, redação de mensagens, standup e revisão semanal. Saída estruturada (JSON validado por schema Zod) pra que o resultado vire dado no sistema, e não só texto |
 | **Google Agenda** | Fonte dos compromissos, lida pelo endereço iCal secreto (sem OAuth). Eventos recorrentes são expandidos. Os compromissos descontam capacidade no planejamento |
 | **Notion** | Espelho das tarefas num banco do Notion (criado automaticamente), para consultar no celular e ter um "segundo cérebro" fora do app |
 | React + Vite + TypeScript | Frontend (SPA) |
@@ -108,7 +108,6 @@ Ou tudo em containers: `docker compose -f docker-compose.dev.yml up --build` →
 | `SESSION_SECRET` | Qualquer string longa e aleatória |
 | `OPENAI_API_KEY` | platform.openai.com → API keys. Sem chave de IA, o sistema funciona no modo heurístico |
 | `OPENAI_MODEL` | Opcional. Padrão `gpt-5.4-mini` (barato e rápido); para respostas mais elaboradas, `gpt-5.5` |
-| `ANTHROPIC_API_KEY` / `AI_PROVIDER` | Opcional: usar o Claude no lugar da OpenAI (`AI_PROVIDER=anthropic` se as duas chaves existirem) |
 | `GOOGLE_CALENDAR_ICS_URL` | Google Agenda → Configurações da agenda → *Integrar agenda* → **Endereço secreto no formato iCal** |
 | `NOTION_TOKEN` | notion.so/my-integrations → nova integração interna → token |
 | `NOTION_PARENT_PAGE_ID` | ID de uma página do Notion compartilhada com a integração (menu ••• → *Conexões*). O banco "Órbita — Tarefas" é criado dentro dela na primeira sincronização |
@@ -132,7 +131,7 @@ orbita/
     src/
       server.ts            rotas, login e sessão por cookie assinado
       db.ts                schema SQLite e ajustes
-      lib/ai.ts            as 5 funções de IA (OpenAI ou Claude + fallback heurístico)
+      lib/ai.ts            as 5 funções de IA (OpenAI + fallback heurístico)
       lib/calendar.ts      Google Agenda (iCal, eventos recorrentes)
       lib/notion.ts        sincronização com o Notion
       routes/              tarefas, IA, painel, rotina (pomodoro, semana, check-in, integrações)

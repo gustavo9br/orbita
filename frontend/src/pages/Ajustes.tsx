@@ -73,7 +73,7 @@ export function Ajustes({ settings, aoSalvar, aoSair }: { settings: Settings; ao
           {integ ? (
             <span className="chip" style={integ.ia.configurado ? { background: "var(--good-bg)", color: "var(--good)" } : undefined}>
               {integ.ia.configurado
-                ? `● ${integ.ia.provedor === "openai" ? "OpenAI" : "Claude"} · ${integ.ia.modelo}`
+                ? `● OpenAI · ${integ.ia.modelo}`
                 : "○ sem chave: modo heurístico"}
             </span>
           ) : (
@@ -171,7 +171,7 @@ export function Ajustes({ settings, aoSalvar, aoSair }: { settings: Settings; ao
               {log.map((l, i) => (
                 <div key={i} className="linha small" style={{ justifyContent: "space-between" }}>
                   <span>
-                    <span className="selo-ia">{l.mode === "heuristica" ? "⚙ heurística" : l.mode === "openai" ? "✦ OpenAI" : "✦ Claude"}</span> {l.kind.replace("_", " ")} · {l.summary}
+                    <span className="selo-ia">{l.mode === "heuristica" ? "⚙ heurística" : "✦ OpenAI"}</span> {l.kind.replace("_", " ")} · {l.summary}
                   </span>
                   <span className="muted">{relativo(l.created_at)}</span>
                 </div>

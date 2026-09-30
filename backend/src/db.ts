@@ -150,6 +150,6 @@ export function gravarValor(chave: string, valor: string): void {
   );
 }
 
-export function registrarIA(kind: string, mode: "openai" | "claude" | "heuristica", summary: string): void {
+export function registrarIA(kind: string, mode: "openai" | "heuristica", summary: string): void {
   db.prepare("INSERT INTO ai_log (kind, mode, summary) VALUES (?, ?, ?)").run(kind, mode, summary);
 }

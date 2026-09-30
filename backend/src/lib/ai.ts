@@ -1,5 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
@@ -8,35 +6,24 @@ import { registrarIA } from "../db.js";
 import type { Evento, Tarefa } from "../types.js";
 import { dataLocal, hoje, nomeDoDia, somarDias } from "./dates.js";
 
-// Dois provedores possíveis, escolhidos por configuração (AI_PROVIDER ou pela chave que existir).
-// Prompts e schemas são os mesmos; só a chamada muda.
-type Provedor = "openai" | "claude";
+// IA via OpenAI (Responses API com saída estruturada). Sem OPENAI_API_KEY, tudo cai na heurística local.
+const openai = config.openaiApiKey ? new OpenAI({ apiKey: config.openaiApiKey }) : null;
 
-const MODELO_CLAUDE = "claude-opus-5-5";
-
-function escolherProvedor(): Provedor | null {
-  if (config.aiProvider === "openai" && config.openaiApiKey) return "openai";
-  if (config.aiProvider === "anthropic" && config.anthropicApiKey) return "claude";
-  if (config.openaiApiKey) return "openai";
-  if (config.anthropicApiKey) return "claude";
-  return null;
-}
-
-const provedor = escolherProvedor();
-const openai = provedor === "openai" ? new OpenAI({ apiKey: config.openaiApiKey }) : null;
-const anthropic = provedor === "claude" ? new Anthropic({ apiKey: config.anthropicApiKey }) : null;
+console.log(
+  openai
+    ? `[ia] OpenAI ativa · modelo ${config.openaiModel} · chave ...${config.openaiApiKey!.slice(-4)}`
+    : "[ia] OPENAI_API_KEY não recebida pelo backend: funções de IA vão usar a heurística local",
+);
 
 export function iaDisponivel(): boolean {
-  return provedor !== null;
+  return openai !== null;
 }
 
-export function descricaoIA(): { provedor: Provedor | null; modelo: string | null } {
-  if (provedor === "openai") return { provedor, modelo: config.openaiModel };
-  if (provedor === "claude") return { provedor, modelo: MODELO_CLAUDE };
-  return { provedor: null, modelo: null };
+export function descricaoIA(): { provedor: "openai" | null; modelo: string | null } {
+  return openai ? { provedor: "openai", modelo: config.openaiModel } : { provedor: null, modelo: null };
 }
 
-export type ModoIA = Provedor | "heuristica";
+export type ModoIA = "openai" | "heuristica";
 export interface RespostaIA<T> {
   modo: ModoIA;
   modelo?: string;
@@ -52,19 +39,14 @@ Princípios que você segue:
 - Sustentabilidade: capacidade realista, pausas e limites de horário importam tanto quanto entregas. Não incentive hora extra.
 Escreva sempre em português do Brasil, direto e sem floreios.`;
 
-/** Chama o provedor configurado com saída estruturada: a resposta volta validada pelo schema Zod. */
+/** Chama a OpenAI com saída estruturada: a resposta volta validada pelo schema Zod. */
 async function chamarEstruturado<T extends z.ZodType>(
   schema: T,
   prompt: string,
   esforco: "low" | "medium" | "high",
 ): Promise<z.infer<T>> {
-  if (openai) return chamarOpenAI(schema, prompt, esforco);
-  if (anthropic) return chamarClaude(schema, prompt, esforco);
-  throw new Error("Nenhum provedor de IA configurado");
-}
-
-async function chamarOpenAI<T extends z.ZodType>(schema: T, prompt: string, esforco: "low" | "medium" | "high"): Promise<z.infer<T>> {
-  const resposta = await openai!.responses.parse({
+  if (!openai) throw new Error("OPENAI_API_KEY não configurada");
+  const resposta = await openai.responses.parse({
     model: config.openaiModel,
     instructions: SISTEMA,
     input: prompt,
@@ -79,29 +61,6 @@ async function chamarOpenAI<T extends z.ZodType>(schema: T, prompt: string, esfo
   return resposta.output_parsed as z.infer<T>;
 }
 
-/**
- * Claude com saída estruturada. Usa o fallback padrão do servidor pra que uma recusa por
- * classificador seja reprocessada em outro modelo em vez de falhar.
- */
-async function chamarClaude<T extends z.ZodType>(schema: T, prompt: string, esforco: "low" | "medium" | "high"): Promise<z.infer<T>> {
-  const resposta = await anthropic!.beta.messages.parse({
-    model: MODELO_CLAUDE,
-    max_tokens: 16000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
-    system: SISTEMA,
-    output_config: { effort: esforco, format: betaZodOutputFormat(schema) },
-    messages: [{ role: "user", content: prompt }],
-  });
-  if (resposta.stop_reason === "refusal") {
-    throw new Error("A IA recusou esta solicitação. Tente reformular o texto.");
-  }
-  if (resposta.parsed_output == null) {
-    throw new Error("A IA respondeu num formato inesperado.");
-  }
-  return resposta.parsed_output as z.infer<T>;
-}
-
 function descreverErro(erro: unknown): string {
   if (erro instanceof OpenAI.AuthenticationError) return "Chave da OpenAI inválida.";
   if (erro instanceof OpenAI.RateLimitError) {
@@ -111,15 +70,12 @@ function descreverErro(erro: unknown): string {
   }
   if (erro instanceof OpenAI.NotFoundError) return `Modelo "${config.openaiModel}" não encontrado na OpenAI (confira OPENAI_MODEL).`;
   if (erro instanceof OpenAI.APIError) return `Erro da API da OpenAI (${erro.status}).`;
-  if (erro instanceof Anthropic.AuthenticationError) return "Chave da Anthropic inválida.";
-  if (erro instanceof Anthropic.RateLimitError) return "Limite de uso da API atingido; tente de novo em instantes.";
-  if (erro instanceof Anthropic.APIError) return `Erro da API do Claude (${erro.status}).`;
   if (erro instanceof Error) return erro.message;
   return "Erro desconhecido ao chamar a IA.";
 }
 
 /**
- * Tenta o provedor de IA; se não houver chave ou a chamada falhar, usa a heurística local
+ * Tenta a OpenAI; se não houver chave ou a chamada falhar, usa a heurística local
  * e devolve um aviso — o sistema nunca trava por causa da IA.
  */
 async function comFallback<T>(
@@ -128,11 +84,11 @@ async function comFallback<T>(
   viaIA: () => Promise<T>,
   viaHeuristica: () => T,
 ): Promise<RespostaIA<T>> {
-  if (provedor) {
+  if (openai) {
     try {
       const resultado = await viaIA();
-      registrarIA(tipo, provedor, resumo);
-      return { modo: provedor, modelo: descricaoIA().modelo ?? undefined, resultado };
+      registrarIA(tipo, "openai", resumo);
+      return { modo: "openai", modelo: config.openaiModel, resultado };
     } catch (erro) {
       console.error(`[ia:${tipo}]`, erro);
       registrarIA(tipo, "heuristica", resumo);
@@ -147,7 +103,7 @@ async function comFallback<T>(
   return {
     modo: "heuristica",
     resultado: viaHeuristica(),
-    aviso: "Nenhuma chave de IA configurada (OPENAI_API_KEY ou ANTHROPIC_API_KEY) — resultado gerado por regras simples.",
+    aviso: "OPENAI_API_KEY não chegou ao backend — resultado gerado por regras simples, sem IA.",
   };
 }
 

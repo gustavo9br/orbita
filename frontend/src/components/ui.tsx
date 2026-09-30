@@ -71,7 +71,7 @@ export function OrigemIA({ resposta }: { resposta: RespostaIA<unknown> | null })
       <span className="selo-ia">
         {resposta.modo === "heuristica"
           ? "⚙ Modo heurístico (sem IA)"
-          : `✦ Gerado por IA · ${resposta.modo === "openai" ? "OpenAI" : "Claude"}${resposta.modelo ? ` (${resposta.modelo})` : ""}`}
+          : `✦ Gerado por IA · OpenAI${resposta.modelo ? ` (${resposta.modelo})` : ""}`}
       </span>
       {resposta.aviso && <div className="aviso">{resposta.aviso}</div>}
     </div>

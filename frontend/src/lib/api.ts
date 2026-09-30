@@ -50,7 +50,7 @@ export interface Checkin {
 }
 
 export interface RespostaIA<T> {
-  modo: "openai" | "claude" | "heuristica";
+  modo: "openai" | "heuristica";
   modelo?: string;
   resultado: T;
   aviso?: string;
@@ -123,7 +123,7 @@ export interface ResumoSemana {
 }
 
 export interface Integracoes {
-  ia: { configurado: boolean; provedor: "openai" | "claude" | null; modelo: string | null };
+  ia: { configurado: boolean; provedor: "openai" | null; modelo: string | null };
   google: { configurado: boolean; ultimaSync: string | null };
   notion: { configurado: boolean; ultimaSync: string | null; url: string | null };
 }
